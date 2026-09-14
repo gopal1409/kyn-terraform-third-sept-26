@@ -1,0 +1,899 @@
+Below is a step-by-step AWS VPC lab guide that you can use for teaching or hands-on practice.
+
+The architecture will contain:
+
+1 VPC
+1 Internet Gateway
+2 subnets:
+App Subnet — public
+DB Subnet — private
+1 custom route table for the App subnet
+0.0.0.0/0 → Internet Gateway
+App subnet associated with the custom route table
+1 EC2 instance launched in the App subnet
+Security Group allowing SSH and HTTP
+
+Important: A subnet becomes effectively public when its route table has a route to an Internet Gateway and the instance has a public IPv4 address. AWS also notes that the security group must permit the required traffic.
+
+AWS VPC Lab: App and DB Subnets with EC2
+1. Architecture
+
+The final architecture will look like:
+
+                         INTERNET
+                             |
+                             |
+                    +----------------+
+                    | Internet       |
+                    | Gateway        |
+                    +----------------+
+                             |
+                             |
+                    +-------------------+
+                    |      VPC          |
+                    |   10.0.0.0/16     |
+                    |                   |
+                    |  +-------------+  |
+                    |  | App Subnet   |  |
+                    |  | 10.0.1.0/24  |  |
+                    |  |              |  |
+                    |  | EC2 Instance |  |
+                    |  | Public IP    |  |
+                    |  +-------------+  |
+                    |        |          |
+                    |        |          |
+                    |  App Route Table  |
+                    |  0.0.0.0/0 -> IGW |
+                    |                   |
+                    |  +-------------+  |
+                    |  | DB Subnet   |  |
+                    |  | 10.0.2.0/24 |  |
+                    |  |             |  |
+                    |  | Database    |  |
+                    |  +-------------+  |
+                    |                   |
+                    +-------------------+
+
+AWS route tables determine where traffic from a subnet is directed, and a subnet can be explicitly associated with a custom route table.
+
+2. IP Address Design
+
+We will use the following CIDR ranges:
+
+Resource	CIDR
+VPC	10.0.0.0/16
+App Subnet	10.0.1.0/24
+DB Subnet	10.0.2.0/24
+
+The important point is that the subnet ranges must be inside the VPC CIDR and must not overlap.
+
+Address layout
+VPC
+10.0.0.0/16
+│
+├── App Subnet
+│   10.0.1.0/24
+│
+└── DB Subnet
+    10.0.2.0/24
+3. Step 1 — Open AWS VPC Console
+
+Go to the AWS Management Console.
+
+Search for:
+
+VPC
+
+Open:
+
+VPC → Your VPCs
+
+You can also use the official AWS VPC console documentation.
+
+4. Step 2 — Create the VPC
+
+Go to:
+
+VPC
+→ Your VPCs
+→ Create VPC
+
+Select:
+
+Resources to create:
+VPC only
+
+Enter:
+
+Name tag:
+training-vpc
+
+IPv4 CIDR:
+
+10.0.0.0/16
+
+IPv6:
+
+No IPv6 CIDR block
+
+Tenancy:
+
+Default
+
+Click:
+
+Create VPC
+
+You should now have:
+
+VPC ID: vpc-xxxxxxxx
+CIDR: 10.0.0.0/16
+
+Record the VPC ID.
+
+5. Step 3 — Create the App Subnet
+
+Go to:
+
+VPC
+→ Subnets
+→ Create subnet
+
+Select:
+
+VPC:
+training-vpc
+
+Subnet name:
+
+app-subnet
+
+Availability Zone:
+
+For example:
+
+us-east-1a
+
+IPv4 subnet CIDR:
+
+10.0.1.0/24
+
+Click:
+
+Create subnet
+
+AWS allows you to configure routing after creating a subnet.
+
+6. Step 4 — Create the DB Subnet
+
+Again go to:
+
+VPC
+→ Subnets
+→ Create subnet
+
+Select:
+
+VPC:
+training-vpc
+
+Subnet name:
+
+db-subnet
+
+Availability Zone:
+
+us-east-1b
+
+IPv4 subnet CIDR:
+
+10.0.2.0/24
+
+Click:
+
+Create subnet
+
+Now you have:
+
+training-vpc
+│
+├── app-subnet
+│   10.0.1.0/24
+│
+└── db-subnet
+    10.0.2.0/24
+7. Step 5 — Create the Internet Gateway
+
+Go to:
+
+VPC
+→ Internet Gateways
+→ Create internet gateway
+
+Name:
+
+training-igw
+
+Click:
+
+Create internet gateway
+
+You should receive something like:
+
+igw-0123456789
+8. Step 6 — Attach Internet Gateway to VPC
+
+Select:
+
+training-igw
+
+Choose:
+
+Actions
+→ Attach to a VPC
+
+Select:
+
+training-vpc
+
+Click:
+
+Attach internet gateway
+
+The IGW should now show:
+
+State: Attached
+VPC: training-vpc
+
+An Internet Gateway must be attached to the VPC before it can provide internet connectivity.
+
+9. Step 7 — Create Custom Route Table
+
+Now create the custom route table that will be used by the App subnet.
+
+Go to:
+
+VPC
+→ Route Tables
+→ Create route table
+
+Name:
+
+app-public-rt
+
+VPC:
+
+training-vpc
+
+Click:
+
+Create route table
+
+You will receive something similar to:
+
+rtb-0123456789
+10. Step 8 — Add Internet Route
+
+Select:
+
+app-public-rt
+
+Go to:
+
+Routes
+→ Edit routes
+→ Add route
+
+Configure:
+
+Destination	Target
+10.0.0.0/16	Local
+0.0.0.0/0	Internet Gateway
+
+For the second route:
+
+Destination:
+0.0.0.0/0
+
+Target:
+Internet Gateway
+
+training-igw
+
+Click:
+
+Save changes
+
+The final route table should look like:
+
+Destination       Target
+--------------------------------
+10.0.0.0/16       local
+0.0.0.0/0         igw-xxxxxxxx
+
+AWS specifically documents adding 0.0.0.0/0 to the subnet route table with the Internet Gateway as the target to provide IPv4 internet access.
+
+11. Step 9 — Associate App Subnet with Route Table
+
+This is a very important step.
+
+Select:
+
+app-public-rt
+
+Go to:
+
+Subnet associations
+→ Edit subnet associations
+
+Select:
+
+app-subnet
+
+Click:
+
+Save associations
+
+Now:
+
+app-subnet
+     |
+     v
+app-public-rt
+     |
+     v
+0.0.0.0/0
+     |
+     v
+Internet Gateway
+
+A subnet can have only one route-table association at a time, while a route table can be associated with multiple subnets.
+
+12. Step 10 — What About the DB Subnet?
+
+For this lab, do not associate the DB subnet with the public route table.
+
+The DB subnet will continue using the VPC's main route table unless you create and associate a separate private route table.
+
+Therefore:
+
+App Subnet
+10.0.1.0/24
+      |
+      v
+app-public-rt
+      |
+      +---- 0.0.0.0/0 → IGW
+
+
+DB Subnet
+10.0.2.0/24
+      |
+      v
+Main Route Table
+      |
+      +---- Local VPC traffic
+
+This is a basic public/private subnet design.
+
+Important: If later you want resources in the DB subnet to initiate outbound internet connections for updates, you would normally introduce a NAT Gateway rather than attaching the DB subnet directly to an Internet Gateway. AWS documents NAT as the alternative when private-subnet resources need internet access without public IP addresses.
+
+13. Step 11 — Enable Public IPv4 for App Subnet
+
+Because we want to launch a public EC2 instance, the instance needs a public IPv4 address.
+
+Go to:
+
+VPC
+→ Subnets
+→ app-subnet
+→ Actions
+→ Edit subnet settings
+
+Enable:
+
+Enable auto-assign public IPv4 address
+
+Save.
+
+Alternatively, you can explicitly select public IP assignment while launching the EC2 instance.
+
+AWS notes that resources using an Internet Gateway need a public IPv4/IPv6 address for internet connectivity.
+
+14. Step 12 — Create Security Group
+
+Now create a security group for the EC2 instance.
+
+Go to:
+
+EC2
+→ Security Groups
+→ Create security group
+
+Security group name:
+
+app-server-sg
+
+Description:
+
+Security group for application server
+
+VPC:
+
+training-vpc
+Inbound Rules
+
+For SSH:
+
+Type: SSH
+Protocol: TCP
+Port: 22
+Source: My IP
+
+For HTTP:
+
+Type: HTTP
+Protocol: TCP
+Port: 80
+Source: 0.0.0.0/0
+
+For teaching/testing, you may see:
+
+SSH
+22
+0.0.0.0/0
+
+but do not use 0.0.0.0/0 for SSH in a production environment. Restrict SSH to your IP or use Systems Manager.
+
+Final example:
+
+Type	Port	Source
+SSH	22	My IP
+HTTP	80	0.0.0.0/0
+15. Step 13 — Launch EC2
+
+Go to:
+
+EC2
+→ Instances
+→ Launch instance
+
+Name:
+
+app-server
+AMI
+
+Select an Amazon Linux AMI, for example:
+
+Amazon Linux
+
+Use the current AMI offered in your selected AWS region rather than hard-coding an old AMI ID.
+
+Instance Type
+
+For a small training lab:
+
+t3.micro
+
+or another instance type available to your account/region.
+
+16. Step 14 — Select Key Pair
+
+Under:
+
+Key pair
+
+Select an existing key pair.
+
+For example:
+
+training-key
+
+If you don't have one:
+
+Create new key pair
+
+Download the .pem file and keep it secure.
+
+17. Step 15 — Configure Network
+
+Under:
+
+Network settings
+
+Select:
+
+VPC:
+training-vpc
+
+Subnet:
+
+app-subnet
+
+Auto-assign Public IP:
+
+Enable
+
+Security Group:
+
+app-server-sg
+
+Your configuration should look like:
+
+VPC
+training-vpc
+
+Subnet
+app-subnet
+
+Public IP
+Enable
+
+Security Group
+app-server-sg
+18. Step 16 — Add User Data
+
+You can install a simple web server automatically.
+
+Under:
+
+Advanced details
+→ User data
+
+Enter:
+
+#!/bin/bash
+
+dnf update -y
+
+dnf install -y httpd
+
+systemctl enable httpd
+systemctl start httpd
+
+echo "<h1>Hello from AWS App Server</h1>" > /var/www/html/index.html
+
+Then launch the instance.
+
+19. Step 17 — Verify EC2
+
+After the instance starts, go to:
+
+EC2
+→ Instances
+→ app-server
+
+Check:
+
+Instance state:
+Running
+
+Then note:
+
+Private IPv4 address
+Public IPv4 address
+Public IPv4 DNS
+Subnet ID
+VPC ID
+Security group
+
+Example:
+
+Instance
+    |
+    +-- VPC: vpc-xxxx
+    |
+    +-- Subnet: app-subnet
+    |
+    +-- Private IP: 10.0.1.10
+    |
+    +-- Public IP: 54.x.x.x
+    |
+    +-- SG: app-server-sg
+20. Step 18 — Test Web Server
+
+Copy the EC2 public IP.
+
+For example:
+
+54.123.45.67
+
+Open your browser:
+
+http://54.123.45.67
+
+You should see:
+
+Hello from AWS App Server
+
+The traffic path is:
+
+Your Browser
+     |
+     v
+Internet
+     |
+     v
+Internet Gateway
+     |
+     v
+VPC
+     |
+     v
+App Route Table
+     |
+     | 0.0.0.0/0
+     v
+App Subnet
+10.0.1.0/24
+     |
+     v
+EC2
+21. Step 19 — Verify Route Table
+
+Go back to:
+
+VPC
+→ Route Tables
+→ app-public-rt
+→ Routes
+
+You should see:
+
+Destination       Target
+--------------------------------
+10.0.0.0/16       local
+0.0.0.0/0         igw-xxxxxxxx
+
+Then check:
+
+Subnet associations
+
+You should see:
+
+app-subnet
+
+This confirms that the App subnet is using your custom route table.
+
+22. Step 20 — Verify DB Subnet
+
+Go to:
+
+VPC
+→ Subnets
+→ db-subnet
+
+Check its associated route table.
+
+For this lab, it should not be associated with:
+
+app-public-rt
+
+Conceptually:
+
+                    training-vpc
+                    10.0.0.0/16
+                         |
+             +-----------+-----------+
+             |                       |
+             v                       v
+       APP SUBNET                 DB SUBNET
+       10.0.1.0/24               10.0.2.0/24
+             |                       |
+             v                       v
+       App Public RT             Main RT
+             |                       |
+             v                       |
+           IGW <---------------------+
+             |
+          Internet
+23. Complete Traffic Flow
+EC2 → Internet
+EC2
+ |
+ | 10.0.1.x
+ v
+App Subnet
+ |
+ v
+App Route Table
+ |
+ | 0.0.0.0/0
+ v
+Internet Gateway
+ |
+ v
+Internet
+Internet → EC2
+Internet
+   |
+   v
+Internet Gateway
+   |
+   v
+Public IP
+   |
+   v
+EC2
+
+The security group then determines whether the inbound traffic is permitted.
+
+24. Important Concept: Why the DB Subnet Is Private
+
+The DB subnet:
+
+10.0.2.0/24
+
+does not have:
+
+0.0.0.0/0 → Internet Gateway
+
+Therefore, it isn't configured as a public subnet.
+
+For a production design, you would typically have:
+
+                    VPC
+                     |
+          +----------+----------+
+          |                     |
+          v                     v
+     Public/App              Private/DB
+     Subnet                   Subnet
+          |                     |
+          v                     v
+        EC2                  Database
+          |
+          v
+         IGW
+
+And if the application in the public subnet needs to communicate with a database:
+
+EC2
+ |
+ | Private IP
+ v
+DB Subnet
+ |
+ v
+RDS / Database
+
+You do not need an Internet Gateway route between the App and DB subnet. The VPC's local route provides communication between subnets in the same VPC.
+
+25. Final AWS Resource List
+
+At the end of the lab you should have:
+
+Resource	Name	Configuration
+VPC	training-vpc	10.0.0.0/16
+Subnet	app-subnet	10.0.1.0/24
+Subnet	db-subnet	10.0.2.0/24
+Internet Gateway	training-igw	Attached
+Route Table	app-public-rt	Custom
+Route	Internet	0.0.0.0/0 → IGW
+Security Group	app-server-sg	SSH + HTTP
+EC2	app-server	App subnet
+26. Validation Checklist
+
+Use this checklist after completing the lab:
+
+[ ] VPC created
+[ ] VPC CIDR = 10.0.0.0/16
+
+[ ] App subnet created
+[ ] App subnet CIDR = 10.0.1.0/24
+
+[ ] DB subnet created
+[ ] DB subnet CIDR = 10.0.2.0/24
+
+[ ] Internet Gateway created
+[ ] Internet Gateway attached to VPC
+
+[ ] Custom route table created
+
+[ ] Route:
+    0.0.0.0/0 → Internet Gateway
+
+[ ] App subnet associated with custom route table
+
+[ ] DB subnet NOT associated with public route table
+
+[ ] App subnet has public IPv4 assignment enabled
+
+[ ] Security Group created
+
+[ ] SSH port 22 allowed from My IP
+
+[ ] HTTP port 80 allowed
+
+[ ] EC2 launched in App subnet
+
+[ ] EC2 received public IP
+
+[ ] Apache/HTTP server installed
+
+[ ] Website accessible using public IP
+27. Optional AWS CLI Version
+
+Once you understand the console workflow, the same architecture can be created with AWS CLI.
+
+Create VPC
+aws ec2 create-vpc \
+  --cidr-block 10.0.0.0/16 \
+  --tag-specifications \
+  'ResourceType=vpc,Tags=[{Key=Name,Value=training-vpc}]'
+Create App subnet
+aws ec2 create-subnet \
+  --vpc-id <VPC_ID> \
+  --cidr-block 10.0.1.0/24 \
+  --availability-zone us-east-1a \
+  --tag-specifications \
+  'ResourceType=subnet,Tags=[{Key=Name,Value=app-subnet}]'
+Create DB subnet
+aws ec2 create-subnet \
+  --vpc-id <VPC_ID> \
+  --cidr-block 10.0.2.0/24 \
+  --availability-zone us-east-1b \
+  --tag-specifications \
+  'ResourceType=subnet,Tags=[{Key=Name,Value=db-subnet}]'
+Create Internet Gateway
+aws ec2 create-internet-gateway \
+  --tag-specifications \
+  'ResourceType=internet-gateway,Tags=[{Key=Name,Value=training-igw}]'
+Attach IGW
+aws ec2 attach-internet-gateway \
+  --vpc-id <VPC_ID> \
+  --internet-gateway-id <IGW_ID>
+Create custom route table
+aws ec2 create-route-table \
+  --vpc-id <VPC_ID> \
+  --tag-specifications \
+  'ResourceType=route-table,Tags=[{Key=Name,Value=app-public-rt}]'
+Create Internet route
+aws ec2 create-route \
+  --route-table-id <ROUTE_TABLE_ID> \
+  --destination-cidr-block 0.0.0.0/0 \
+  --gateway-id <IGW_ID>
+Associate App subnet
+aws ec2 associate-route-table \
+  --route-table-id <ROUTE_TABLE_ID> \
+  --subnet-id <APP_SUBNET_ID>
+
+These CLI steps follow AWS's documented VPC creation, Internet Gateway, custom route-table, route, and subnet-association workflow.
+
+The key concept to teach
+
+The most important thing for students to understand is:
+
+VPC
+ |
+ +--- Subnet
+       |
+       +--- Route Table
+              |
+              +--- Route
+                     |
+                     +--- Target
+
+For your App subnet:
+
+App Subnet
+     |
+     v
+Custom Route Table
+     |
+     +--- 10.0.0.0/16 → local
+     |
+     +--- 0.0.0.0/0 → Internet Gateway
+
+That combination, plus a public IP on the EC2 instance and appropriate security-group rules, is what gives the EC2 instance internet connectivity.
+
+For your DB subnet:
+
+DB Subnet
+     |
+     v
+Private/Main Route Table
+     |
+     +--- 10.0.0.0/16 → local
+
+This gives you the foundation for the next stage: App EC2 → private DB/RDS, followed by NAT Gateway, ALB, and eventually converting the whole architecture into Terraform modules.
