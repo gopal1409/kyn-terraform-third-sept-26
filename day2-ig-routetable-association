@@ -1,0 +1,36 @@
+#create a file called as ig.tf copy line 2 till 8
+  resource "aws_internet_gateway" "igw" {
+  vpc_id = aws_vpc.web_vpc.id
+
+  tags = {
+    Name = "${local.name_prefix}-igw"
+  }
+}
+
+#create another file custom-rtb.tf copy line 11 till 31
+  resource "aws_route_table" "custom_rtb" {
+  vpc_id = aws_vpc.web_vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw.id
+  }
+
+  
+
+ tags = {
+    Name = "${local.name_prefix}-custom-rtb"
+  }
+}
+
+#all the public subnet need to assoicate with the custom rtb
+resource "aws_route_table_association" "custom_rtb_associate" {
+  for_each = aws_subnet.web_subnet
+  subnet_id      = each.value.id
+  route_table_id = aws_route_table.custom_rtb.id
+}
+
+###once you do terrform apply
+  1. verify the custom rtb with your name is created or not
+  2. in custom rtb routes you need to check internet gw is attached or not
+  3. in subnet association you will see subnet1 subnet2 subnet3
