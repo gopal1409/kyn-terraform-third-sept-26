@@ -43,3 +43,14 @@ for_each = var.public_subnet #this will get the whole dic subnet1,subnet2,subnet
 
 ##then do terraform apply
   ###now you will see three subnet created agains your vpc
+#exercise
+1. copy the object varaibles create a new file give the name as private-object-varaibles.tf
+2. change the name of the varaibles from public_subnet to private_subnet
+3. there are three subnet delete the last one
+4. subnet1 will be subnet4 subnet 2 will be subnet5
+5. subnet4 cidr will be 10.0.4.0/24 also change the subnet type from public to private
+6. subnet5 cidr will be 10.0.5.0/24 also change the subnet type from public to private
+#####next create another privatesubnet.tf file copy paste all the content of appsubnet.tf file inside it 
+1. in resource block it is showing web_subnet change it to db_subnet
+2. for_each loop var.public_subnet replace it with private_subnet
+3. then do terraform apply verify that 2 subnet of private is created
