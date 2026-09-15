@@ -1,0 +1,80 @@
+#before making changes run terraform destroy first
+###create a new generic-varaibles.tf file whereever you see my name change it to your name copy from line 2 till 29
+  variable "aws_region" {
+  description = "this is the region "
+  type = string
+  default = "us-east-1"
+}
+
+variable "aws_vpc_cidr" {
+  description = "cidr of vpc"
+  type = string
+  default = "10.0.0.0/16"
+}
+
+variable "web_subnet" {
+  description = "web subnet cidr"
+  type = string
+  default = "10.0.1.0/24"
+}
+
+variable "project_name" {
+  description = "name of the project"
+  type = string
+  default = "gopal-project"
+}
+
+variable "environment" {
+  type = string
+  default = "dev"
+}
+
+###create a file local.tf copy from line 32 till 42
+  locals {
+  #when you want to concatinate multiple values together
+  name_prefix = "${var.project_name}-${var.environment}"
+  #gopal-project-dev
+  #you can use local block for named expression
+  project_tags = {
+    Name = local.name_prefix
+    Environment = var.environment
+    Project = var.project_name
+    Managedby = "Terraform"
+  }
+}
+
+###inside resource.tf file. delete everything and add this copy from line 46 till 53
+  resource "aws_vpc" "web_vpc" {
+    #using terraform we are create a resources
+    #when i create a resource 
+    #aws_vpc is the name of the resources which we are creating
+    #this is an refrence block user define used in terraform.tfsate file
+  cidr_block = var.aws_vpc_cidr
+  tags = local.project_tags
+}
+
+###inside app-subnet.tf delete everything copy from line 56 till 62
+  resource "aws_subnet" "web_subnet" {
+  vpc_id     = aws_vpc.web_vpc.id
+  #how to map the vpc id
+  cidr_block = var.web_subnet
+
+ tags = local.project_tags
+}
+
+#########inside provider.tf delete everything copy from line 65 till 77
+  terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 6.0"
+    }
+  }
+}
+
+# Configure the AWS Provider
+provider "aws" {
+  region = var.aws_region
+}
+
+#finally do terraform apply
