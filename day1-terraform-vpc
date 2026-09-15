@@ -2,4 +2,32 @@
   #then open visual studio code click on file select folder -- go to desktop-select the terraform project
   ##then open it 
   ##inside the project folder create two file provider.tf and resource.tf
-  
+#inside provider.tf file copy from line 6 till 18
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 6.0"
+    }
+  }
+}
+
+# Configure the AWS Provider
+provider "aws" {
+  region = "us-east-1"
+}
+
+#inside resource.tf file change my name to your name copy from line 21 till 26
+resource "aws_vpc" "web_vpc" {
+  cidr_block = "10.0.0.0/16"
+  tags = {
+    Name = "gopal-vpc"
+  }
+}
+
+#after this you need to do 
+terraform init
+terraform validate
+terraform plan
+terraform apply
+##once apply complete it will create the vpc you can go to aws console and check the vpc is created or not
