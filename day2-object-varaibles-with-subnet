@@ -1,0 +1,45 @@
+##create a new file subnet-object-varaibles.tf copy from line 2 till 29
+  variable "public_subnet" { #student
+  description = "subnet configuration"
+  type = map(object({
+    cidr_block        = string #age
+    availability_zone = string #mar4xobtain
+    subnet_type       = string #subject
+
+  }))
+  default = {
+    "subnet1" = { #student1
+      cidr_block        = "10.0.1.0/24"
+      availability_zone = "us-east-1a"
+      subnet_type       = "public"
+    }
+    "subnet2" = {
+      cidr_block        = "10.0.2.0/24"
+      availability_zone = "us-east-1b"
+      subnet_type       = "public"
+    }
+    "subnet3" = {
+      cidr_block        = "10.0.3.0/24"
+      availability_zone = "us-east-1c"
+      subnet_type       = "public"
+    }
+    
+  }
+}
+
+#inside appsubnet.tf delete everything add from line 31 till 42
+  resource "aws_subnet" "web_subnet" {
+for_each = var.public_subnet #this will get the whole dic subnet1,subnet2,subnet3
+#intialzed with subnet1 ,start with second subnet
+  vpc_id = aws_vpc.web_vpc.id #chosse the vpc
+  #how to map the vpc id
+  cidr_block        = each.value.cidr_block #subnet1 cidr block 10.0.1.0/24
+  availability_zone = each.value.availability_zone #us-east-1a
+  tags              = {
+    Name = "${local.name_prefix}-${each.key}"
+    Type = each.value.subnet_type
+  }
+}
+
+##then do terraform apply
+  ###now you will see three subnet created agains your vpc
