@@ -1,0 +1,5 @@
+#in your remote desktop create a folder called as terraform-project
+  #then open visual studio code click on file select folder -- go to desktop-select the terraform project
+  ##then open it 
+  ##inside the project folder create two file provider.tf and resource.tf
+  
