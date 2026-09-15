@@ -31,3 +31,16 @@ terraform validate
 terraform plan
 terraform apply
 ##once apply complete it will create the vpc you can go to aws console and check the vpc is created or not
+
+#lets create the subnet app-subnet.tf copy from line 36 till 44
+resource "aws_subnet" "web_subnet" {
+  vpc_id     = aws_vpc.web_vpc.id
+  #how to map the vpc id
+  cidr_block = "10.0.1.0/24"
+
+  tags = {
+    Name = "Gopal-App-Subnet"
+  }
+}
+
+#then do terraform apply this should create a subnet
