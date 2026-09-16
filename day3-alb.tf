@@ -73,3 +73,46 @@ resource "aws_lb_target_group_attachment" "web_tg_attachment" {
 
 #do terraform apply
   ##check the target group created click on the same you will see all your instance in unused as once we create the lb health checkup will be started
+#create a new file alb.tf copy from line 77 till 107
+resource "aws_lb" "web_lb" {
+  name     = "${local.name_prefix}-alb"
+  internal           = false #this will create external lb
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.alb_sg.id]
+  subnets            = [for subnet in aws_subnet.web_subnet : subnet.id]
+
+
+   tags = {
+    Name = "${local.name_prefix}-alb"
+
+  }
+}
+
+output "alb_dns" {
+    #this will give me the lb dns name using the same i can access all my instance
+  value = aws_lb.web_lb.dns_name
+}
+
+#Listeners and routing this will get the traffic in lb and send to target group
+resource "aws_lb_listener" "alb_listener" {
+  load_balancer_arn = aws_lb.web_lb.arn 
+  port              = "80"
+  protocol          = "HTTP"
+  
+
+  default_action { #listener will send the traffic to 
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.alb-tg.arn
+  }
+}
+
+##exercise
+1. do terraform apply. 
+2. once apply complete go to load balancer click on the same you will get the dns name copy it paste it in browser keep on refreshing the page it will show traffic is in which instance private ip keep on changing
+3. in load balancer listener and rule click on it it will show the target group
+4. click on network mapping you will see all your subnet
+5. click on resource map you will see the traffic flow from lb to load balancer
+6. click on security you will see your custom sg is there
+7. clieck on target group click on target you will se all the instance health. if it is not showing refresh the page
+####finally destroy it
+terraform destroy
