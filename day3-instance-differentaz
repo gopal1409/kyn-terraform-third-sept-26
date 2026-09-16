@@ -62,5 +62,5 @@ output "instance_details" {
 #exercise
   1. terraform apply this will create two instance go to ec2 in filter you can put your name it will show two instance. 
   2. copy the public ip of all the instance one by one in the browser it should work
-  3. instance-object.tf inside the instance object file add third instance size should be t3.small and subnet should be subnet3
+  3. instance-object.tf inside the instance object file add third instance size should be t3.small and subnet should be subnet3 and az should be us-east-1c
   4. terraform apply go to aws console you can see third instance 
