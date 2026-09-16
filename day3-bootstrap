@@ -1,0 +1,55 @@
+#create a new file app.sh copy from line 2 till 55
+#!/bin/bash
+
+# Update packages
+apt-get update -y
+
+# Install nginx
+apt-get install nginx -y
+
+# Get the hostname of the EC2 instance
+HOSTNAME=$(hostname)
+
+# Get the private IP address
+PRIVATE_IP=$(hostname -I | awk '{print $1}')
+
+# Get the operating system information
+OS_NAME=$(lsb_release -ds)
+
+# Create custom web page
+cat <<EOF > /var/www/html/index.html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Terraform AWS Demo</title>
+</head>
+
+<body>
+
+    <h1>Hello from Terraform!</h1>
+
+    <h2>Ubuntu EC2 + Nginx</h2>
+
+    <p><strong>Server deployed using Terraform.</strong></p>
+
+    <hr>
+
+    <h3>Server Information</h3>
+
+    <p><strong>Hostname:</strong> $HOSTNAME</p>
+
+    <p><strong>Private IP:</strong> $PRIVATE_IP</p>
+
+    <p><strong>Operating System:</strong> $OS_NAME</p>
+
+    <p><strong>Web Server:</strong> Nginx</p>
+
+</body>
+</html>
+EOF
+
+# Enable nginx at boot
+systemctl enable nginx
+
+# Start/restart nginx
+systemctl restart nginx
