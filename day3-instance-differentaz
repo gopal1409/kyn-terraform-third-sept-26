@@ -1,0 +1,66 @@
+#first do terraform destroy
+  ##create a new file instance-object.tf copy line 2 till 23
+  variable "instance" {
+  description = "ec2 instance to be created"
+  type = map(object({
+    instance_type = string
+    availablity_zone = string
+    subnet_key = string #this subnet key is an pre defined varaible in terraform which you can use to pickup your subnet
+  }))
+  default = {
+    "web1" = {
+      instance_type = "t3.micro"
+      availablity_zone = "us-east-1a"
+    subnet_key = "subnet1"
+    }
+    "web2" = {
+      instance_type = "t3.medium"
+      availablity_zone = "us-east-1b"
+    subnet_key = "subnet2"
+    }
+    
+  }
+}
+
+#####inside vm.tf delete everything copy line 24 till 55
+  resource "aws_instance" "web_vm" {
+    for_each = var.instance
+  ami           = data.aws_ami.ubuntu.id
+  instance_type = each.value.instance_type
+  subnet_id = aws_subnet.web_subnet[each.value.subnet_key].id
+  vpc_security_group_ids = [ aws_security_group.web_sg.id ]
+
+  associate_public_ip_address = true
+    user_data = file("${path.module}/app.sh")
+  #path.module is an meta argument in terraform which will look for any file in the current directory
+  #user_data = C:\Users\gopal\OneDrive\Desktop\terraform-project\path.sh
+  tags = {
+    Name = "${local.name_prefix}-${each.key}"
+    Project = var.project_name
+    Environment = var.environment
+  }
+}
+
+#once our instance get create we want to display some values
+#instance id public ip of the instance 
+output "instance_details" {
+    description = "show the instance id public ip and private ip"
+    value = {
+        for name, instance in aws_instance.web_vm :
+        name => {
+            instance_id = instance.id 
+            public_ip = instance.public_ip
+            private_ip = instance.private_ip
+        }
+    }
+}
+
+/*output "public_ip" {
+  value = aws_instance.web_vm.public_ip
+}*/
+
+#exercise
+  1. terraform apply this will create two instance go to ec2 in filter you can put your name it will show two instance. 
+  2. copy the public ip of all the instance one by one in the browser it should work
+  3. instance-object.tf inside the instance object file add third instance size should be t3.small and subnet should be subnet3
+  4. terraform apply go to aws console you can see third instance 
