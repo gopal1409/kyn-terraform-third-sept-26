@@ -22,7 +22,7 @@
   }
 }
 
-#####inside vm.tf delete everything copy line 24 till 55
+#####inside vm.tf delete everything copy line 24 till 56
   resource "aws_instance" "web_vm" {
     for_each = var.instance
   ami           = data.aws_ami.ubuntu.id
