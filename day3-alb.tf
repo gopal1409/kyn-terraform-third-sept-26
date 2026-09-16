@@ -37,7 +37,7 @@
   }
 }
 
-output "security_group_id" {
+output "albsecurity_group_id" {
   value = aws_security_group.alb_sg.id
 }
 #lets create the alb-target-group.tf
