@@ -29,3 +29,7 @@ git status
 git commit -m "we are starting with calcy program"
 ##git log will show the first version
 git log
+
+#lets generate the key pair
+ssh-keygen -t rsa
+
