@@ -1,0 +1,16 @@
+########first we will destroy everything as we want to create the same using terraform cloud
+  #create a file .gitignore also ensure that this file created on your root directory of the project not inside .terraform folder copy line 3 to 6 isnide it 
+.terraform
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.backup
+  ###inside the terminal 
+  git init
+  git add .
+  git commit -m "terraform code"
+  git log
+  #once you see our first version
+  ###go to your github click on the + icon at the top create a new repo with kyn-terraform-manifest-second-sep26
+  #once you create the repo in quick setup select ssh
+  #############from the push an existing repository from the command line copy all the line and paste it in the terminale 
+  #verify that your code is upload in github refresh the page
