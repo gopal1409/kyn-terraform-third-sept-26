@@ -47,3 +47,26 @@ git commit -m "added addtion function to calc.py"
 git log
 #finally push the changes to remote once push you can refresh your github page click on calcy.py file it will show two lines
 git push origin main
+##lets learn about git branching
+#git branch will show what are the branches we have
+git branch
+#this will create a branch called as subtract
+  git branch subtract
+#to switch to that branch we use checkout command
+git checkout subtract
+#now the git branch will show pointer is in subtract branch
+git branch
+#inside calcy.py we have two line 
+cat calcy.py
+#we add another line inside calcy.py
+echo "added subtract function" >> calcy.py
+cat calcy.py
+#add it commit it 
+ git add calcy.py
+git commit -m "added subtract function"
+#lets move to the main branch
+git checkout main
+#now if you see calcy.py only two lines are there
+cat calcy.py
+ ##finally push the change to remote repo and verify from the github three lines in feature branch and two lines in main branc
+  558  git push origin --all
