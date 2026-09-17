@@ -1,0 +1,6 @@
+##go to instance object.tf file 
+  ##we will change the instance size from whatever size you can see change it to t2.micro
+  git add .
+  git commit -m "change the instance size to t2.micro"
+  git push origin main
+  ###go to the terraform cloud you will see automated run 
