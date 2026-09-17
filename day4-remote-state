@@ -1,0 +1,21 @@
+##open visual studio code
+  terraform destroy
+  ##after that we need to delete a folder
+  .terraform
+  ##delete this file also
+  .terraform.lock.hcl
+  terraform.tfstate
+  terraform.tfstate.backup
+  ###then we will create an backend.tf file copy from line 11 till 19
+
+  terraform {
+  backend "s3" {
+    bucket = "mybucket" #change it to your bucket name
+    key    = "dev/gopal.tfstate" #change my name to your name
+    region = "us-east-1"
+    use_lockfile = true
+    encrypt = true
+  }
+}
+
+  
