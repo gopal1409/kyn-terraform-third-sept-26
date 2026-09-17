@@ -1,0 +1,31 @@
+#lets create the git global variables
+  git config --global user.name "gopal das"
+  git config --global user.email "gopal1409@gmail.com"
+  ###to check your global variables
+  git config --global --list
+##lets create our first commit 
+##we will create a folder inside the folder we will create some file
+mkdir projectx
+cd projectx/
+#touch will crete only blank file
+touch secret
+touch auth
+touch DS_Store
+touch calcy.py
+#inside calcy.py we are adding some line
+echo "we are starting with calcy program" > calcy.py
+ls
+#this will show that git is not managing this folder
+git status
+#we will insitalized the folder with git 
+git init
+#now git status will show the folder is managed by git
+git status
+ls -la
+#we will move calcy.py to staging aread
+git add calcy.py
+git status
+#lets do a commit this will create our first version
+git commit -m "we are starting with calcy program"
+##git log will show the first version
+git log
