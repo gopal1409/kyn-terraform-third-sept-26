@@ -18,4 +18,15 @@
   }
 }
 
+#then do 
+terraform init
+##once you do terraform init expand the .terraform folder you will fin tfstate file if you open the file it point to your s3 bucket
+terraform validate
+terraform plan
+##finaly do 
+terraform apply
+##once applied complete you can see a dev filder create inside the devfolder you will see the state file
+###select the stae file at the top there is open button it will show the state file 
+###click on show version you will see the version of state file
+###on your local machine also you will not fine any tfstate file
   
