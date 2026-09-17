@@ -32,4 +32,18 @@ git log
 
 #lets generate the key pair
 ssh-keygen -t rsa
-
+##lets add one more line
+cat calcy.py
+#we will add another line to our calcy project
+echo "adding addtion function to calcy.py file" >> calcy.py
+#git status will show that the calcy.py file is modified
+git status
+#if you want to check what modification has been done 
+git diff
+#lets move the modification to github
+git add calcy.py
+git commit -m "added addtion function to calc.py"
+#now git log will show there are two commit and also you can see the global variable are attache
+git log
+#finally push the changes to remote once push you can refresh your github page click on calcy.py file it will show two lines
+git push origin main
