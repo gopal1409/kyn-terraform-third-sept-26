@@ -126,3 +126,14 @@ private_subnet = {
   3. two more instance with prod and size will be different
   4. check the lb now you have two lb one is for dev another for prod
   
+#lets destroy the prod and dev environment
+#first prod
+terraform workspace list
+terraform workspace select prod
+terraform destroy
+###once destroy complete check the prod vpc it is deleted or not
+#lets delete the dev workspace
+terraform workspace list
+terraform workspace select dev
+terraform destroy
+#once destroy check the dev environment is deleted or not
