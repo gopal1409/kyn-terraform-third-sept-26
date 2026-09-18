@@ -1,0 +1,85 @@
+#lets create a folder called as call-terraform-module
+  ##inside the call-terraform-module create a file provider.tf copy from line 3 till 15
+  terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 6.0"
+    }
+  }
+}
+
+# Configure the AWS Provider
+provider "aws" {
+  region = var.aws_region
+}
+
+####create a file local.tf copy from line 18 till 29
+  locals {
+  #when you want to concatinate multiple values together
+  name_prefix = "${var.project_name}-${var.environment}"
+  #gopal-project-dev
+  #you can use local block for named expression
+  project_tags = {
+    Name        = local.name_prefix
+    Environment = var.environment
+    Project     = var.project_name
+    Managedby   = "Terraform"
+  }
+}
+###create a file variables.tf copy from line 31 till 79
+  variable "aws_region" {
+  description = "this is the region "
+  type        = string
+
+}
+
+variable "aws_vpc_cidr" {
+  description = "cidr of vpc"
+  type        = string
+
+}
+
+variable "web_subnet" {
+  description = "web subnet cidr"
+  type        = string
+
+}
+
+variable "project_name" {
+  description = "name of the project"
+  type        = string
+
+}
+
+variable "environment" {
+  type    = string
+
+}
+
+variable "private_subnet" { #student
+  description = "privsate subnet configuration"
+  type = map(object({
+    cidr_block        = string #age
+    availability_zone = string #mar4xobtain
+    subnet_type       = string #subject
+
+  }))
+}
+
+variable "public_subnet" { #student
+  description = "subnet configuration"
+  type = map(object({
+    cidr_block        = string #age
+    availability_zone = string #mar4xobtain
+    subnet_type       = string #subject
+
+  }))
+ 
+}
+
+###create a file output.tf from 82 till 85
+  output "vpc_id" {
+  description = "id of the vpc"
+  value       = module.networking.vpc_id
+}
