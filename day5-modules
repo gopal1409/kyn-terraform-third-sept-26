@@ -34,7 +34,7 @@
   ##copy all the three command for pushing your code and paste it in the terminal
   ##finally in github you need to share the link with me
 
-modules/networking/variables.tf
+Inside modules/networking/variables.tf copy from line 38 till 71
 variable "project_name" {
   description = "Project name"
   type        = string
@@ -69,7 +69,8 @@ variable "private_subnet" {
     subnet_type       = string
   }))
 }
-modules/networking/main.tf
+
+# inside modules/networking/main.tf copy from line 74 till 193
 locals {
 
   name_prefix = "${var.project_name}-${var.environment}"
@@ -190,7 +191,8 @@ resource "aws_route_table_association" "public" {
 
   route_table_id = aws_route_table.public.id
 }
-modules/networking/outputs.tf
+
+inside - modules/networking/outputs.tf copy from line 196 till 267
 output "vpc_id" {
 
   description = "VPC ID"
@@ -263,3 +265,8 @@ output "private_subnet_details" {
 
   }
 }
+
+#lets finally upload the code in github
+git add .
+git commit -m "terraform networking module code"
+git push origin main
