@@ -1,0 +1,35 @@
+##create a directory structure like this in desktop first create a folder
+    terraform-aws-module-sep-third26-week/
+│
+├── modules/
+│   │
+│   ├── networking/
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   └── outputs.tf
+│   │
+│   ├── security-group/
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   └── outputs.tf
+│   │
+│   ├── compute/
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   └── outputs.tf
+│   │
+│   └── alb/
+│       ├── main.tf
+│       ├── variables.tf
+│       └── outputs.tf
+
+  #once you created the folder open a new visual studio code click on file open-folder select the folder terraform-aws-module-sep-third26-week
+  ##once selected inside networking securitygroup compute alb you need to create filesw main.tf varaibles.tf output.tf
+  ##then open the terminal
+  git init
+  git add .
+  git commit -m "terraform module"
+  ###then go to your github click on the + icon new repo give the name as terraform-aws-module-sep-third26-week then create it 
+  ##you need to click on ssh in quick setup 
+  ##copy all the three command for pushing your code and paste it in the terminal
+  ##finally in github you need to share the link with me
