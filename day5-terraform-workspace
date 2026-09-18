@@ -1,4 +1,4 @@
-##lets create dev.tfvars copy from line 2 till 51
+##lets create dev.tfvars copy from line 2 till 51 change the project name to your name
   #agains the varaible we have provider all the values agains it
 #$#varaIble declarion is always required
 #we have define default values. 
